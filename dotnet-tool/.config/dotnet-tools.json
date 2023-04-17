@@ -1,0 +1,18 @@
+{
+  "version": 1,
+  "isRoot": true,
+  "tools": {
+    "avs.replace": {
+      "version": "1.0.0",
+      "commands": [
+        "replace"
+      ]
+    },
+	"orang.dotnet.cli": {
+      "version": "1.0.0",
+      "commands": [
+        "orang"
+      ]
+    }
+  }
+}
