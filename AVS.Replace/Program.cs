@@ -50,7 +50,7 @@ Console.WriteLine("");
 
 //replace: 
 
-string testArgs = "simply -w test";
+string testArgs = "Binance BitGet -w test";
 
 var input = args.Length > 0 ? Input.ParseArgs(args) : Input.CommandLine(testArgs);
 
@@ -59,6 +59,9 @@ if (input == null)
     PowerConsole.Print("Please specify text to search");
     return;
 }
+
+//тулза пока что не рабочая, сканирование директорий есть но поиска по файлам и т.д. пока что нету 
+
 
 //PowerConsole.Print(input.ToString());
 

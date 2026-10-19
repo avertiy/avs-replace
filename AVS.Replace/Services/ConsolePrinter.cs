@@ -13,29 +13,26 @@ public class ConsolePrinter : IPrinter
 {
 	public void PrintSearchResults(SearchContext context)
 	{
-		var path = context.WorkingDirectory;
-		path = path.Contains("..") ? Path.GetFullPath(context.WorkingDirectory): path;
-
-		PowerConsole.Print($"Search results: found {context.Files?.Count} file(s) and {context.Directories?.Count} directories.");
-		PowerConsole.Print($"Search path: {path}");
-
-
-		PrintDirectories(context);
-		PrintFiles(context);
+        //var path = context.WorkingDirectory;
+        //path = path.Contains("..") ? Path.GetFullPath(context.WorkingDirectory): path;
+        //PowerConsole.Print($"Found {context.Files?.Count} file(s) and {context.Directories?.Count} folder(s) at {path}");
+        PowerConsole.WriteLine();
+        PrintDirectories(context);
+        PowerConsole.WriteLine();
+        PrintFiles(context);
 	}
 
 	public void PrintFiles(SearchContext context)
 	{
-		if (context.Files == null)
-			return;
-		PowerConsole.WriteLine();
-		//core-lib does not support CTags yet in switch color mode, SwitchColorOutputWriter needs to be completed
-		//PowerConsole.Print($"Found #{context.Files.Count} files matching <Cyan>`{context.SearchText}`</Cyan>:", PrintOptions.CTags());
-		PowerConsole.Write($"Found #{context.Files.Count} files matching``:");
-		PowerConsole.Write(context.SearchText, ConsoleColor.Cyan);
-		PowerConsole.WriteLine("`:");
+        if (context.Files == null || context.Files.Count == 0)
+		{
+            PowerConsole.Print($"No files matching <Cyan>`{context.SearchText}`</Cyan>:");
+            return;
+        }
 
-		var searchText = context.SearchText;
+        PowerConsole.Print($"Found #{context.Files.Count} files matching <Cyan>`{context.SearchText}`</Cyan>:");
+
+        var searchText = context.SearchText;
 		var len = searchText.Length;
 
 		var di = new DirectoryInfo(context.WorkingDirectory);
@@ -59,8 +56,11 @@ public class ConsolePrinter : IPrinter
 
 	public void PrintDirectories(SearchContext context)
 	{
-		if (context.Directories == null)
-			return;
+        if (context.Directories == null || context.Directories.Count == 0)
+        {
+            PowerConsole.Print($"No directories matching <Cyan>`{context.SearchText}`</Cyan>:");
+            return;
+        }
 
 		PowerConsole.Print($"Found #{context.Directories.Count} directories matching <Cyan>`{context.SearchText}`</Cyan>:");
 		var searchText = context.SearchText;

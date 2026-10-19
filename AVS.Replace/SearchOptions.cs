@@ -31,6 +31,7 @@ public class SearchOptions
         if (Regexp)
             sb.Append("RegExp ");
 
+        sb.Append($"depth:{Depth} ");
         sb.Append($"file types:{FileTypes} ");
         sb.Append($"exclude:{Exclude} ");
 

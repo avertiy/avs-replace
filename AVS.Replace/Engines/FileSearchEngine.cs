@@ -35,17 +35,18 @@ public class FileSearchEngine : AbstractEngine
 		var searchText = context.SearchText;
 		var files = new List<FileInfo>();
 		var directories = new List<string>();
-		for (var i = 0; i < entries.Length; i++)
+
+        for (var i = 0; i < entries.Length; i++)
 		{
 			var entry = entries[i];
 			var name = Path.GetFileName(entry);
 			if (!name.Contains(searchText))
 				continue;
-
-			var progress = i * 100 / entries.Length;
-			if (progress > 10 && progress % 10 == 0)
+			
+            if (entries.Length > 50 && i % 10 == 0)
 			{
-				ReportProgress($"Scanning file system.. #{entries.Length - i} entries to process", progress);
+                var progress = i * 100.0 / entries.Length; // count=2000 i=50, 50/2000 p=2.5%
+                ReportProgress($"#{i} entries of #{entries.Length} processed", Convert.ToInt32(progress));
 			}
 			// get the file attributes for file or directory
 			//var attr = File.GetAttributes(entry);
@@ -56,7 +57,7 @@ public class FileSearchEngine : AbstractEngine
 				files.Add(fi);
 		}
 
-		ReportProgress($"Scan completed: files #{files.Count}; directories #{directories.Count}", 100);
+		ReportProgress($"Scan files system completed: found #{files.Count} files, #{directories.Count} folders", 100);
 		context.Files = files;
 		context.Directories = directories;
 	}
