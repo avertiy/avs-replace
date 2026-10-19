@@ -12,8 +12,6 @@ algorithm might prioritize scan small folders & small files first, don't waste t
 
 using AVS.CoreLib.PowerConsole;
 using AVS.CoreLib.PowerConsole.Enums;
-using AVS.CoreLib.PowerConsole.Printers;
-using AVS.CoreLib.PowerConsole.Utilities;
 using AVS.Replace;
 using AVS.Replace.Services;
 
@@ -36,13 +34,13 @@ using AVS.Replace.Services;
 PowerConsole.SwitchColorMode(ColorMode.AnsiCodes);
 
 PowerConsole.WriteLine("test standard color");
-PowerConsole.Print("<Cyan>test colors output</Cyan>", PrintOptions.CTags());
+PowerConsole.Print("<Cyan>test colors output</Cyan>");
 PowerConsole.WriteLine("test standard color");
 
 // switch colors printer work but it does not support ctags at the moment..
 PowerConsole.SwitchColorMode(ColorMode.Default);
 PowerConsole.WriteLine("test standard color");
-PowerConsole.Print("<Cyan>test colors output</Cyan>", PrintOptions.CTags());
+PowerConsole.Print("<Cyan>test colors output</Cyan>");
 PowerConsole.Foreground = ConsoleColor.DarkRed;
 PowerConsole.Print("test dark red");
 PowerConsole.ColorSchemeReset();

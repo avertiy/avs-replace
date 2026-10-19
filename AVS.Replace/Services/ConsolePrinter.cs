@@ -1,8 +1,6 @@
 ﻿using AVS.CoreLib.Console.ColorFormatting.Extensions;
 using AVS.CoreLib.Console.ColorFormatting.Tags;
 using AVS.CoreLib.PowerConsole;
-using AVS.CoreLib.PowerConsole.Printers;
-
 namespace AVS.Replace.Services;
 
 public interface IPrinter
@@ -51,11 +49,11 @@ public class ConsolePrinter : IPrinter
 			{
 				dirName = dir;
 				var currentDir = dir.Replace(rootPath, ".");
-				PowerConsole.Print($"\r\n{currentDir}", CTag.DarkYellow);
+				PowerConsole.Print($"\r\n{currentDir}", ConsoleColor.DarkYellow);
 			}
 
 			var message = $"{i+1}) {Highlight(fileInfo.Name, searchText, CTag.Cyan)}";
-			PowerConsole.Print(message, PrintOptions.CTags());
+			PowerConsole.Print(message);
 		}
 	}
 
@@ -64,18 +62,18 @@ public class ConsolePrinter : IPrinter
 		if (context.Directories == null)
 			return;
 
-		PowerConsole.Print($"Found #{context.Directories.Count} directories matching <Cyan>`{context.SearchText}`</Cyan>:", PrintOptions.CTags());
+		PowerConsole.Print($"Found #{context.Directories.Count} directories matching <Cyan>`{context.SearchText}`</Cyan>:");
 		var searchText = context.SearchText;
 		var len = searchText.Length;
 		foreach (var dir in context.Directories)
 		{
 			var message = Highlight(dir, searchText, CTag.Cyan);
-			PowerConsole.Print(message, PrintOptions.CTags());			
+			PowerConsole.Print(message);			
 		}
 	}
 
 	private string Highlight(string str, string matchText, CTag tag)
 	{
-		return str.Replace(matchText, matchText.WrapInTag(tag));
+        return str.Replace(matchText, matchText.WrapInTag(tag));
 	}
 }

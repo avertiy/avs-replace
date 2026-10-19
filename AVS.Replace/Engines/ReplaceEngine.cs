@@ -1,8 +1,5 @@
-﻿using System.IO;
-using System.Text;
-using AVS.CoreLib.PowerConsole;
-using AVS.CoreLib.PowerConsole.Printers;
-using AVS.Replace.Helpers;
+﻿using AVS.CoreLib.PowerConsole;
+using AVS.CoreLib.PowerConsole.Printers2;
 using AVS.Replace.Services;
 using ConsoleColor = System.ConsoleColor;
 
@@ -77,7 +74,7 @@ public class ReplaceEngine : AbstractEngine
 		}
 		catch (Exception ex)
 		{
-			PowerConsole.PrintError(ex, $"Unable to rename directory: {path} - skipped", false, PrintOptions.NoTimestamp);
+			PowerConsole.PrintError(ex, $"Unable to rename directory: {path} - skipped", false, PrintOptions2.Inline);
 			return path;
 		}
 	}
@@ -103,7 +100,7 @@ public class ReplaceEngine : AbstractEngine
 		}
 		catch (Exception ex)
 		{
-			PowerConsole.PrintError(ex, $"Processing files at `{path}` failed", false, PrintOptions.NoTimestamp);
+			PowerConsole.PrintError(ex, $"Processing files at `{path}` failed", false, PrintOptions2.Inline);
 		}
 	}
 
@@ -140,7 +137,7 @@ public class ReplaceEngine : AbstractEngine
 		}
 		catch (Exception ex)
 		{
-			PowerConsole.PrintError(ex, $"Unable to rename file: {name} - skipped", false, PrintOptions.NoTimestamp);			
+			PowerConsole.PrintError(ex, $"Unable to rename file: {name} - skipped", false, PrintOptions2.Inline);			
 		}
 	}
 }
