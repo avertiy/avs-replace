@@ -1,4 +1,6 @@
-﻿namespace AVS.Replace.Engines;
+﻿using AVS.CoreLib.PowerConsole;
+
+namespace AVS.Replace.Engines;
 
 public interface IEngine
 {
@@ -14,5 +16,10 @@ public abstract class AbstractEngine : IEngine
 	protected void ReportProgress(string status, int progress)
 	{
 		ProgressChange?.Invoke((status, progress));
-	}
+
+		if (progress > 0)
+			PowerConsole.Print($"Progress {progress}%.. {status}");
+		else
+            PowerConsole.Print(status);
+    }
 }

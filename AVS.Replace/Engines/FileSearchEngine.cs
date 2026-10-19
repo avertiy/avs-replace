@@ -30,7 +30,7 @@ public class FileSearchEngine : AbstractEngine
 
 		var entries = await _fileSystemService.ScanAsync(path, scanOptions);
 
-		ReportProgress($"Scanning file system.. #{entries.Length} entries to process", 10);
+		ReportProgress($"Scanning file system.. Found #{entries.Length} entries to be processed", 10);
 
 		var searchText = context.SearchText;
 		var files = new List<FileInfo>();

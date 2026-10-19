@@ -32,7 +32,7 @@ using AVS.Replace.Services;
 
 //ansi colors strangely not working when using the tool as intalled cmd tool
 PowerConsole.SwitchColorMode(ColorMode.AnsiCodes);
-
+/*
 PowerConsole.WriteLine("test standard color");
 PowerConsole.Print("<Cyan>test colors output</Cyan>");
 PowerConsole.WriteLine("test standard color");
@@ -46,16 +46,31 @@ PowerConsole.Print("test dark red");
 PowerConsole.ColorSchemeReset();
 PowerConsole.WriteLine("test standard color");
 Console.WriteLine("");
+*/
 
-var input = args.Length > 0 ? Input.ParseArgs(args) : Input.CommandLine("AVS");
+//replace: 
+
+string testArgs = "simply -w test";
+
+var input = args.Length > 0 ? Input.ParseArgs(args) : Input.CommandLine(testArgs);
 
 if (input == null)
-	return;
+{
+    PowerConsole.Print("Please specify text to search");
+    return;
+}
+
+//PowerConsole.Print(input.ToString());
 
 SearchContext context = SearchContext.FromInputArgs(input);
 
+PowerConsole.Print(context.ToString());
+
 var factory = new DefaultFactory();
 var engine = factory.GetEngine(context.SearchMode);
+
+
+
 
 await engine.ExecuteAsync(context);
 

@@ -1,5 +1,6 @@
 ﻿using CommandLine;
 using CommandLine.Text;
+using System.Text;
 
 namespace AVS.Replace;
 
@@ -68,6 +69,37 @@ public class Input
 
 	[Option('l', "max length", Required = false, Default = 102_400, HelpText = "Set file size limit, by default files with size > 100kb are skipped")]
 	public int MaxLength { get; set; } = 102_400;
+
+
+    public override string ToString()
+    {
+		var sb = new StringBuilder();
+
+		//if (CopyPaste)
+		//	sb.AppendLine("copy-paste mode enabled");
+
+		//      if (QuickScan)
+		//          sb.AppendLine("quick-scan mode enabled");
+
+		sb.Append($"search:{SearchText}");
+
+        if (Regexp)
+            sb.Append("(regexp)");
+
+        if (ReplaceText != null)
+            sb.Append($" replace with:{ReplaceText}");
+
+		sb.Append($" dir:{WorkingDirectory}");
+
+		if (CaseSensitive)
+            sb.Append($" case-sensitive");
+
+        sb.Append($" depth:{Depth} file types:{FileTypes} exclude:{Exclude}");
+
+		// other props are not supported for now
+
+        return sb.ToString();
+    }
 
 	public static Input? CommandLine(string args)
 	{

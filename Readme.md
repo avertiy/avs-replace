@@ -12,6 +12,11 @@ dotnet tool install -g AVS.Replace
 >Tool 'avs.replace' (version '9.0.0') was successfully installed
 ```
 
+To uninstall the tool
+
+```
+dotnet tool uninstall -g AVS.Replace
+```
 ## How to use?
 
 In command line, you can invoke this tool on any file using the following syntax:
@@ -21,8 +26,3 @@ replace "file-path.txt" -set "placeholder1" "value1" -set "placeholder2" "value2
 ```
 
 It will simply load the file as text into memory, replace each of the specified placeholders with the provided value, and overwrite the file.
-
-
-dotnet tool install -g dotnetsay
-You can uninstall the tool using the following command.
-dotnet tool uninstall -g dotnetsay

@@ -1,10 +1,8 @@
-﻿using AVS.CoreLib.PowerConsole.Utilities;
-using AVS.Replace.Enums;
-using CommandLine;
+﻿using System.Diagnostics;
 
 namespace AVS.Replace;
 
-
+[DebuggerDisplay("{ToString()}")]
 public class SearchContext
 {
 	public string WorkingDirectory { get; set; } = ".";
@@ -43,21 +41,18 @@ public class SearchContext
 		//etc.
 		return ctx;
 	}
-}
 
-public class SearchOptions
-{
-	public string FileTypes { get; set; } = "*.*";
-	public string Exclude { get; set; } = ".git";
-	public FileTypeClass ExcludeFileClasses { get; set; } = FileTypeClass.AllNonText;
-	public int MaxLength { get; set; } = 102_400;
-	public bool Regexp { get; set; }
-	public bool CaseSensitive { get; set; } = true;
-	public bool ImageFiles { get; set; } = false;
-	public bool MediaFiles { get; set; } = false;
-	
-	public UserMode UserMode { get; set; }
-	public int Depth { get; set; } = 3;
+    public override string ToString()
+    {
+		if (Replace == null)
+		{
+			return $"search text:\"{SearchText}\", dir:{WorkingDirectory}\r\noptions:{Options}";
+        }
+		else
+		{
+            return $"search text:\"{SearchText}\" replace with:\"{Replace}\", dir:\"{WorkingDirectory}\"\r\noptions:{Options}";
+        }
+    }
 }
 
 public enum SearchMode
@@ -70,12 +65,3 @@ public enum SearchMode
 	Replace,
 	CopyPaste
 }
-
-public enum UserMode
-{
-	Default = 0,
-	Verbose,
-	Silent
-}
-
-
