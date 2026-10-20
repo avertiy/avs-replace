@@ -48,7 +48,7 @@ you copy an existing client e.g. Binance folder, and you need to rename files, c
 			...
 
 ```
-> replace Binance BitGet -w Clients\BitGet
+> repl Binance BitGet -w Clients\BitGet
 ```
 /BitGet
 		BitGetClient.cs
