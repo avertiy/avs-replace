@@ -7,9 +7,9 @@ A .NET Global tool for search and replace in files, similar to Ctrl+Shift+F or C
 To install it, run the following command in CMD:
 
 ```
-dotnet tool install -g avs-replace
+dotnet tool install --global avs-replace --version 9.0.2
 >You can invoke the tool using the following command: replace
->Tool 'avs-replace' (version '9.0.1') was successfully installed
+>Tool 'avs-replace' (version '9.0.2') was successfully installed
 ```
 
 To uninstall the tool
