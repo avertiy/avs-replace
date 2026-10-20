@@ -10,7 +10,6 @@ public class ReplaceEngine : AbstractEngine
 	private readonly ISearchFileService _searchFileService;
 	private readonly IMatchService _matchService;
 	private readonly IReplaceService _replaceService;
-	private SearchContext? _context;
 
 	public ReplaceEngine(IAbstractFactory factory)
 	{
@@ -21,35 +20,38 @@ public class ReplaceEngine : AbstractEngine
 
 	public override Task ExecuteAsync(SearchContext context)
 	{
-		_context = context;
 		_searchFileService.Init(context);
 		_matchService.Init(context);
-		var path = _context.WorkingDirectory;
-		ProcessDirectory(path);
+		var path = context.WorkingDirectory;
+		var counter = ProcessDirectory(path, context);
 		return Task.CompletedTask;
 	}
 
-	private void ProcessDirectory(string path, int depth = 0)
+	private int ProcessDirectory(string path, SearchContext context, int depth = 0)
 	{
-		ProcessFiles(path);
+		var counter = ProcessFiles(path, context);
 		foreach (var directory in _searchFileService.EnumerateTopDirectories(path))
 		{
 			var dir = directory;
 			if (_matchService.MatchFileName(directory))
 			{
-				dir = RenameDirectory(directory);
+				dir = RenameDirectory(directory, context);
 			}
 
-			if (_context.Options.Depth > 0 && depth < _context.Options.Depth)
-				ProcessDirectory(dir, depth + 1);
+			if (context.Options.Depth > 0 && depth < context.Options.Depth)
+                counter += ProcessDirectory(dir, context, depth + 1);
 		}
+
+		if (counter > 0)
+            PowerConsole.PrintF($"<Cyan>{path}</Cyan> - #{counter} files have been processed");
+        return counter;
 	}
 
-	private string RenameDirectory(string path)
+	private string RenameDirectory(string path, SearchContext context)
 	{
 		try
 		{
-			var len = _context.SearchText.Length;
+			var len = context.SearchText.Length;
 			var rootPath = Path.GetDirectoryName(path);
 
 			if (rootPath == null)
@@ -60,7 +62,7 @@ public class ReplaceEngine : AbstractEngine
 
 			var name = Path.GetFileName(path);
 
-			var newName = name.Replace(_context.SearchText, _context.Replace);
+			var newName = name.Replace(context.SearchText, context.Replace);
 			var fullPath = Path.Combine(rootPath, newName);
 
 			if (Directory.Exists(fullPath))
@@ -79,22 +81,23 @@ public class ReplaceEngine : AbstractEngine
 		}
 	}
 
-	private void ProcessFiles(string path)
+	private int ProcessFiles(string path, SearchContext context)
 	{
-		try
+        var counter = 0;
+        try
 		{
 			var files = _searchFileService.EnumerateFiles(path);
 			foreach (var file in files)
 			{
 				var fileInfo = new FileInfo(file);
-				if (fileInfo.Length > _context.Options.MaxLength || fileInfo.IsReadOnly)
+				if (fileInfo.Length > context.Options.MaxLength || fileInfo.IsReadOnly)
 					continue;
 
-				_replaceService.ProcessFile(file, _context);
-
-				if (_matchService.MatchFileName(fileInfo.Name))
+				_replaceService.ProcessFile(file, context);
+				counter++;
+                if (_matchService.MatchFileName(fileInfo.Name))
 				{
-					RenameFile(fileInfo);
+					RenameFile(fileInfo, context);
 				}
 			}
 		}
@@ -102,22 +105,19 @@ public class ReplaceEngine : AbstractEngine
 		{
 			PowerConsole.PrintError(ex, $"Processing files at `{path}` failed", false, PrintOptions2.Inline);
 		}
+		return counter;
 	}
 
-	private void RenameFile(FileInfo fileInfo)
+	private void RenameFile(FileInfo fileInfo, SearchContext context)
 	{
 		var name = fileInfo.Name;
 		try
 		{
-			var len = _context.SearchText.Length;
-			var newname = name.Replace(_context.SearchText, _context.Replace);
+			var len = context.SearchText.Length;
+			var newname = name.Replace(context.SearchText, context.Replace);
 
-			if (_context.Options.UserMode == UserMode.Verbose)
+			if (context.Options.UserMode == UserMode.Verbose)
 			{
-				//for now no colorizing
-				//PowerConsole.Write(name.Substring(0, index), ConsoleColor.White);
-				//PowerConsole.Write(name.Substring(index, len), ConsoleColor.Yellow);
-				//PowerConsole.Print(name.Substring(index + len), ConsoleColor.Yellow);
 				var confirmation = PowerConsole.PromptYesNo($"Confirm file renaming \"{name}\" => \"{newname}\"", 0);
 				if (!confirmation)
 					return;
@@ -133,7 +133,7 @@ public class ReplaceEngine : AbstractEngine
 			}
 
 			fileInfo.MoveTo(fullPath, true);
-			PowerConsole.Print($"File \"{name}\" => \"{newname}\" - done", ConsoleColor.Green);
+			PowerConsole.Print($"File \"{name}\" has been renamed \"{newname}\" successfully", ConsoleColor.Green);
 		}
 		catch (Exception ex)
 		{

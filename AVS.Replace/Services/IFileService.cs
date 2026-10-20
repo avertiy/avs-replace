@@ -1,4 +1,5 @@
 ﻿using System.Dynamic;
+using AVS.CoreLib.PowerConsole;
 using AVS.Replace;
 
 namespace AVS.Replace.Services;
@@ -57,7 +58,14 @@ public class SearchFileService : ISearchFileService
 		//	AttributesToSkip = GetAttributesToSkip(false)
 		//};
 		//return Directory.EnumerateDirectories(path,"*", options);
-		return Directory.EnumerateDirectories(path, "*", SearchOption.TopDirectoryOnly);
+		try {
+            return Directory.EnumerateDirectories(path, "*", SearchOption.TopDirectoryOnly);
+		}
+		catch(IOException ex)
+		{
+			PowerConsole.PrintError(ex);
+			return [];
+		}
 	}
 
 	public IEnumerable<string> EnumerateFiles(string path)

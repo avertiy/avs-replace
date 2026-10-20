@@ -48,32 +48,31 @@ PowerConsole.WriteLine("test standard color");
 Console.WriteLine("");
 */
 
-//replace: 
-
-string testArgs = "Binance BitGet -w test";
-
-var input = args.Length > 0 ? Input.ParseArgs(args) : Input.CommandLine(testArgs);
+var input = Input.ParseArgs(args);
 
 if (input == null)
 {
-    PowerConsole.Print("Please specify text to search");
-    return;
+    //string testArgs = "BitGet Binance -w test\\BitGetApi";
+    string testArgs = "Binance BitGet -w test\\BitGetApi";
+    PowerConsole.PrintF($"args not provided, running demo:<Green>{testArgs}</Green>");
+    input = Input.CommandLine(testArgs);
 }
 
-//тулза пока что не рабочая, сканирование директорий есть но поиска по файлам и т.д. пока что нету 
+var options = input.GetOptions();
+var ctx = new SearchContext()
+{
+    Options = options,
+    SearchText = input.SearchText,
+    WorkingDirectory = input.WorkingDirectory,
+    Replace = input.ReplaceText,
+    Mode = input.GetSearchMode(),
+    Regexp = input.GetRegexp()
+};
 
-
-//PowerConsole.Print(input.ToString());
-
-SearchContext context = SearchContext.FromInputArgs(input);
-
-PowerConsole.Print(context.ToString());
+ctx.Print();
 
 var factory = new DefaultFactory();
-var engine = factory.GetEngine(context.SearchMode);
+var engine = factory.GetEngine(ctx.Mode);
 
-
-
-
-await engine.ExecuteAsync(context);
+await engine.ExecuteAsync(ctx);
 

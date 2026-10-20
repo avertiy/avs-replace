@@ -1,14 +1,16 @@
-﻿using System.Diagnostics;
+﻿using AVS.CoreLib.PowerConsole;
+using System.Diagnostics;
+using System.Text.RegularExpressions;
 
 namespace AVS.Replace;
 
-[DebuggerDisplay("{ToString()}")]
+//[DebuggerDisplay("{ToString()}")]
 public class SearchContext
 {
 	public string WorkingDirectory { get; set; } = ".";
 	public string SearchText { get; set; } = "";
 	public string? Replace { get; set; }
-	public SearchMode SearchMode { get; set; }
+	public SearchMode Mode { get; set; }
 
 	public SearchOptions Options { get; set; } = new SearchOptions();
 
@@ -21,47 +23,41 @@ public class SearchContext
 	/// holds dir paths that match search criteria
 	/// </summary>
 	public List<string>? Directories { get; set; }
+	
+	public required Regex Regexp { get; set; }
 
-	public static SearchContext FromInputArgs(Input args)
+    public void Print()
 	{
-		var ctx = new SearchContext
-		{
-			SearchText = args.SearchText,
-			WorkingDirectory = args.WorkingDirectory,
-			Options =
-			{
-				CaseSensitive = args.CaseSensitive,
-				Regexp = args.Regexp,
-				FileTypes = args.FileTypes,
-				Exclude = args.Exclude,
-				Depth = args.Depth
-			},
-			Replace = args.ReplaceText
-		};
-		//etc.
-		return ctx;
-	}
+        string text = Mode switch
+        {
+            SearchMode.QuickScan => $"quick scan <Green>\"{SearchText}\"</Green>",
+            SearchMode.Replace => $"<Green>\"{SearchText}\"</Green> replace with <Cyan>\"{Replace}\"</Cyan>",
+            _ => $"search <Green>\"{SearchText}\"</Green>",
+        };
+        PowerConsole.Print(text);
+        //PowerConsole.Print("Search Options:");
+        PowerConsole.PrintF($"Working dir:<Blue>\"{WorkingDirectory}\"</Blue> depth:<Blue>{Options.Depth}</Blue>");
+        PowerConsole.PrintF($"CaseSensitive:<Blue>{Options.CaseSensitive}</Blue> Regexp:<Blue>{Options.Regexp}</Blue>");
+        PowerConsole.PrintF($"File types:<Cyan>{Options.FileTypes}</Cyan> <DarkGray>(exclude:{Options.Exclude})</DarkGray>");
 
-    public override string ToString()
-    {
-		if (Replace == null)
-		{
-			return $"search text:\"{SearchText}\", dir:{WorkingDirectory}\r\noptions:{Options}";
-        }
-		else
-		{
-            return $"search text:\"{SearchText}\" replace with:\"{Replace}\", dir:\"{WorkingDirectory}\"\r\noptions:{Options}";
-        }
     }
 }
 
 public enum SearchMode
 {
+    /// <summary>
+    /// scan filesystem and file contents
+    /// </summary>
+    Default = 0,
 	/// <summary>
-	/// quick scan 
+	/// scan only filesystem without file contents
 	/// </summary>
-	FileSearch = 0,
-	TextSearch = 1,
-	Replace,
-	CopyPaste
+	QuickScan = 1,
+	/// <summary>
+	/// rename files / directories, replace text in file contents
+	/// </summary>
+	Replace =3,
+
+
+	//CopyPaste
 }

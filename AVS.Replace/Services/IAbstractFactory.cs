@@ -33,7 +33,7 @@ public class DefaultFactory : IAbstractFactory
 		IEngine engine = null;
 		switch (searchMode)
 		{
-			case SearchMode.FileSearch:
+			case SearchMode.Default:
 				engine = new FileSearchEngine(new FileSystemService(), new ConsolePrinter());
 				break;
 			default:

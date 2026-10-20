@@ -22,6 +22,7 @@ public class SearchOptions
     public override string ToString()
     {
 		var sb = new StringBuilder();
+
         if (UserMode != UserMode.Default)
 			sb.Append($"mode:{UserMode} ");
 

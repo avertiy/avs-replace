@@ -1,6 +1,7 @@
 ﻿using CommandLine;
 using CommandLine.Text;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace AVS.Replace;
 
@@ -8,7 +9,7 @@ namespace AVS.Replace;
 /// args:
 /// [0] - search text
 /// [1] - replace text [optional]
-///-Q - quick scan mode
+///-Q - quick scan mode instructs to scan only filesystem wihtout file contents
 ///-C - copy-paste mode
 ///
 ///-c - case sensitive
@@ -25,7 +26,7 @@ namespace AVS.Replace;
 /// </summary>
 public class Input
 {
-	[Option('C', "copy-paste mode", Required = false, Default = false, HelpText = "Set copy-paste mode to make copy-paste+replace operations.")]
+	[Option('C', "copy-paste mode", Required = false, Default = false, HelpText = "Set copy-paste mode to make copy-paste+replace operations.")] //not sure i remember what those supposed to do
 	public bool CopyPaste { get; set; }
 
 	[Option('Q', "quick scan mode", Required = false, Default = false, HelpText = "Set to quick scan.")]
@@ -44,8 +45,8 @@ public class Input
 	[Option('d', "depth", Required = false, Default = 3, HelpText = "Set depth to search in subdirectories, default is 3")]
 	public int Depth { get; set; } = 3;
 
-	[Option('e', "exclude", Required = false, Default = ".git;.vs;bin;obj;node_modules;*.exe;*.pdb;*.dll", HelpText = "Set exclude to skip files & directories, default `.git;.vs;bin;obj;*.exe;*.pdb;*.dll`.")]
-	public string Exclude { get; set; } = ".git;.vs;bin;obj;node_modules;*.exe;*.pdb;*.dll";
+	[Option('e', "exclude", Required = false, Default = ".git;.vs;bin;obj;node_modules;*.exe;*.pdb;*.dll;*.md", HelpText = "Set exclude to skip files & directories, default `.git;.vs;bin;obj;*.exe;*.pdb;*.dll`.")]
+	public string Exclude { get; set; } = ".git;.vs;bin;obj;node_modules;*.exe;*.pdb;*.dll;*.md";
 	[Option('f', "file types", Required = false, Default = "*.*", HelpText = "Set file types pattern to search, default is `*.*`.")]
 	public string FileTypes { get; set; } = "*.*";
 
@@ -101,13 +102,55 @@ public class Input
         return sb.ToString();
     }
 
-	public static Input? CommandLine(string args)
+
+	public SearchOptions GetOptions()
 	{
-		return ParseArgs(args.Split(' ', StringSplitOptions.RemoveEmptyEntries));
+		var options = new SearchOptions
+		{
+			CaseSensitive = CaseSensitive,
+			Regexp = Regexp,
+			FileTypes = FileTypes,
+			Exclude = Exclude,
+			Depth = Depth
+		};
+
+		return options;
+	}
+
+    public RegexOptions GetRegexOptions()
+	{
+		var options = RegexOptions.None;
+
+		if (CaseSensitive == false)
+			options = options | RegexOptions.IgnoreCase;
+
+		return options;
+    }
+
+
+    public Regex GetRegexp()
+	{
+		var options = GetRegexOptions();
+		return new Regex(SearchText, options);
+	}
+
+	public SearchMode GetSearchMode()
+	{
+		return ReplaceText == null
+			? SearchMode.Default
+			: SearchMode.Replace;
+    }
+
+    public static Input CommandLine(string args)
+	{
+		return ParseArgs(args.Split(' ', StringSplitOptions.RemoveEmptyEntries)) ?? new Input();
 	}
 
 	public static Input? ParseArgs(params string[] args)
 	{
+		if (args.Length == 0)
+			return null;
+
 		var parserRes = Parser.Default.ParseArguments<Input>(args);
 		return parserRes.Value;
 	}

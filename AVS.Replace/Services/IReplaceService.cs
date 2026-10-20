@@ -1,8 +1,10 @@
-﻿using System.Text;
-using AVS.CoreLib.Extensions;
+﻿using AVS.CoreLib.Extensions;
+using AVS.CoreLib.Extensions.Collections;
 using AVS.CoreLib.PowerConsole;
 using AVS.CoreLib.Text.Extensions;
 using AVS.Replace.Helpers;
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace AVS.Replace.Services;
 
@@ -27,40 +29,76 @@ public class ReplaceService : IReplaceService
 
 	private string ProcessContent(string content, string path, SearchContext context)
 	{
-		if (context.Options.Regexp)
-		{
-			PowerConsole.Print("Regexp is not supported yet", ConsoleColor.DarkRed);
-			return content;
-		}
-		else
-		{
-			if (context.Options.UserMode == UserMode.Silent)
-			{
-				var output = content.Replace(context.SearchText, context.Replace);
-				PowerConsole.Print($"{path} - done", ConsoleColor.Cyan);
-				return output;
-			}
+        var options = context.Options;
 
-			var indexes = content.IndexOfAllOccurrences(context.SearchText).ToArray();
-			PowerConsole.Print($"Processing {path} found #{indexes.Length} occurrences of `{context.SearchText}`");
+        string output;
+        var oldValue = context.SearchText;
+        var newValue = context.Replace!;
 
+        var lowerCaseOldValue = oldValue.ToLower();
+        var lowerCaseNewValue = newValue.ToLower();
 
-			var sb = new StringBuilder(content);
-			var oldValue = context.SearchText;
-			var newValue = context.Replace;
-			
-			foreach (var index in indexes)
-			{
-				var line = sb.GetLineByOffset(index);
-				var lineIndex = sb.GetLineIndexOf(index);
-				var ind = line.IndexOf(oldValue);
-				PowerConsole.Print($"[{lineIndex}]{line} contains `{oldValue}` at {ind} => `{newValue}`", ConsoleColor.Yellow);
-				sb.Replace(oldValue, newValue, index, newValue.Length);
-				var newLine = sb.GetLineAt(lineIndex);
-				PowerConsole.Print($"[{lineIndex}]`{line}` => `{newLine}` - done", ConsoleColor.Green);
-			}
+        var regex = context.Regexp;
+        var stringComparison = options.CaseSensitive ? StringComparison.InvariantCulture : StringComparison.InvariantCultureIgnoreCase;
 
-			return sb.ToString();
-		}
-	}
+        if (context.Options.UserMode == UserMode.Silent)
+        {
+            output = content.Replace(oldValue, newValue);
+            PowerConsole.Print($"{path} - DONE", ConsoleColor.Cyan);
+            return output;
+        }
+
+        PowerConsole.WriteLine();
+        PowerConsole.PrintF($"<Cyan>\"{path}\"</Cyan>:");
+
+        var lines = content.Split(Environment.NewLine);
+        var lineIndexes = new List<int>();
+
+        for (var i = 0; i < lines.Length; i++)
+        {
+            var line = lines[i];
+            var ind = line.IndexOf(oldValue, stringComparison);
+
+            if (ind == -1)
+                continue;
+
+            lineIndexes.Add(i);
+            line = line.TrimLine(oldValue, maxLength: 1000);
+            lines[i] = line;
+
+            line = line.Replace(oldValue, $"<Green>{oldValue}</Green>");
+
+            if (!options.CaseSensitive)
+                line = line.Replace(lowerCaseOldValue, $"<Green>{lowerCaseOldValue}</Green>");
+
+            PowerConsole.PrintF($"Line[{i}] {line}");
+        }
+
+        PowerConsole.WriteLine(false);
+        PowerConsole.PrintF($"Replacing <Green>`{oldValue}`</Green> => <Cyan>`{newValue}`</Cyan>..");
+        PowerConsole.WriteLine(false);
+
+        output = content.Replace(oldValue, newValue);
+
+        if (!options.CaseSensitive)
+            output = output.Replace(lowerCaseOldValue, lowerCaseNewValue);
+
+        for (var i = 0; i < lineIndexes.Count; i++)
+        {
+            var index = lineIndexes[i];
+            var line = lines[index];
+            line = line.Replace(oldValue, $"<Cyan>{newValue}</Cyan>");
+
+            if (!options.CaseSensitive)
+                line = line.Replace(lowerCaseOldValue, $"<Cyan>{lowerCaseNewValue}</Cyan>");
+
+            PowerConsole.PrintF($"Line[{index}] {line}");
+        }
+
+        PowerConsole.WriteLine(false);
+        PowerConsole.PrintF($"<Cyan>\"{path}\"</Cyan> - DONE");
+        PowerConsole.WriteLine(false);
+
+        return output;
+    }
 }
