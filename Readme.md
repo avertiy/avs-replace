@@ -7,22 +7,52 @@ A .NET Global tool for search and replace in files, similar to Ctrl+Shift+F or C
 To install it, run the following command in CMD:
 
 ```
-dotnet tool install -g AVS.Replace
+dotnet tool install -g avs-replace
 >You can invoke the tool using the following command: replace
->Tool 'avs.replace' (version '9.0.0') was successfully installed
+>Tool 'avs-replace' (version '9.0.1') was successfully installed
 ```
 
 To uninstall the tool
 
 ```
-dotnet tool uninstall -g AVS.Replace
+dotnet tool uninstall -g avs-replace
 ```
 ## How to use?
 
-In command line, you can invoke this tool on any file using the following syntax:
+Basically the tool has been designed for use case when you need to quickly add another implementation
+which is based on some template e.g. you have project structure:
+
+ /Clients 
+     /Binance
+		BinanceClient.cs
+		BinanceAuthenticator.cs
+		/BinanceObjects
+			BinanceTrade.cs
+			...
+		..
+	 /Bytbit
+		BybitClient.cs
+		BybitAuthenticator.cs
+		/BybitObjects
+			BybitTrade.cs
+			...
+		..
+You want to add another client let's say BitGet
+you copy an existing client e.g. Binance folder, and you need to rename files, classes, namespaces etc. 
+
+/BitGet
+		BinanceClient.cs
+		BinanceAuthenticator.cs
+		/BinanceObjects
+			BinanceTrade.cs
+			...
 
 ```
-replace "file-path.txt" -set "placeholder1" "value1" -set "placeholder2" "value2" -set ...
+> replace Binance BitGet -w Clients\BitGet
 ```
-
-It will simply load the file as text into memory, replace each of the specified placeholders with the provided value, and overwrite the file.
+/BitGet
+		BitGetClient.cs
+		BitGetAuthenticator.cs
+		/BitGetObjects
+			BitGetTrade.cs
+			...
