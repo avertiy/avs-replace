@@ -51,7 +51,7 @@ public class ReplaceService : IReplaceService
         PowerConsole.WriteLine();
         PowerConsole.PrintF($"<Cyan>\"{path}\"</Cyan>:");
 
-        var lines = content.Split(Environment.NewLine);
+        var lines = content.Split(["\r\n","\n"]);
         var lineIndexes = new List<int>();
 
         for (var i = 0; i < lines.Length; i++)

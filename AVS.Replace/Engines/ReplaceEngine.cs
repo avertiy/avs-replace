@@ -23,35 +23,49 @@ public class ReplaceEngine : AbstractEngine
 		_searchFileService.Init(context);
 		_matchService.Init(context);
 		var path = context.WorkingDirectory;
-		var counter = ProcessDirectory(path, context);
+
+        if (Directory.Exists(path))
+		{
+            var counter = ProcessDirectory(path, context);
+        }
+		else
+		{
+            PowerConsole.Print($"Path `{path}` does not exist", ConsoleColor.Red);
+        }
 		return Task.CompletedTask;
 	}
 
 	private int ProcessDirectory(string path, SearchContext context, int depth = 0)
-	{
-		var counter = ProcessFiles(path, context);
-		foreach (var directory in _searchFileService.EnumerateTopDirectories(path))
-		{
-			var dir = directory;
-			if (_matchService.MatchFileName(directory))
-			{
-				dir = RenameDirectory(directory, context);
-			}
+	{		
+        PowerConsole.WriteLine(false);
+        PowerConsole.PrintF($"=========== Start processing <Blue>{path}</Blue> ============");
 
-			if (context.Options.Depth > 0 && depth < context.Options.Depth)
-                counter += ProcessDirectory(dir, context, depth + 1);
-		}
-
+        var counter = ProcessFiles(path, context);
 		if (counter > 0)
-            PowerConsole.PrintF($"<Cyan>{path}</Cyan> - #{counter} files have been processed");
+			PowerConsole.PrintF($"<Green>{path} <Blue>#{counter}</Blue> files have been processed</Green>");
+
+        foreach (var directory in _searchFileService.EnumerateTopDirectories(path))
+		{
+            if (context.Options.Depth > 0 && depth < context.Options.Depth)
+                counter += ProcessDirectory(directory, context, depth + 1);
+        }
+
+        RenameDir(path, context);
+        
+        PowerConsole.WriteLine(false);
         return counter;
 	}
 
-	private string RenameDirectory(string path, SearchContext context)
+	private string RenameDir(string path, SearchContext context)
 	{
-		try
+        try
 		{
-			var len = context.SearchText.Length;
+            var dirName = Path.GetFileName(path);
+
+			if (!_matchService.MatchFileName(dirName))
+				return path;
+
+            var len = context.SearchText.Length;
 			var rootPath = Path.GetDirectoryName(path);
 
 			if (rootPath == null)
@@ -60,23 +74,26 @@ public class ReplaceEngine : AbstractEngine
 				return path;
 			}
 
-			var name = Path.GetFileName(path);
+			var newName = dirName.Replace(context.SearchText, context.Replace);
 
-			var newName = name.Replace(context.SearchText, context.Replace);
-			var fullPath = Path.Combine(rootPath, newName);
+			if (dirName == newName)
+				return path;
 
-			if (Directory.Exists(fullPath))
+			var newPath = Path.Combine(rootPath, newName);
+
+			if (Directory.Exists(newPath))
 			{
-				PowerConsole.Print($"Directory `{newName}` already exists at {rootPath}.");
+				PowerConsole.Print($"Directory `{newName}` already exists at {rootPath}.", ConsoleColor.Red);
+				return path;
 			}
 
-			Directory.Move(path, fullPath);
-			PowerConsole.Print($"{rootPath}: directory {name} => {newName} - done", ConsoleColor.Green);
-			return fullPath;
+			Directory.Move(path, newPath);
+			PowerConsole.PrintF($"Directory `{rootPath}\\<Green>{dirName}</Green>` has been renamed to `{rootPath}\\<Cyan>{newName}</Cyan>`");
+			return newPath;
 		}
 		catch (Exception ex)
 		{
-			PowerConsole.PrintError(ex, $"Unable to rename directory: {path} - skipped", false, PrintOptions2.Inline);
+			PowerConsole.PrintError(ex, $"Unable to rename directory: {path}", false);
 			return path;
 		}
 	}

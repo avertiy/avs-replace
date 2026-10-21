@@ -52,8 +52,8 @@ var input = Input.ParseArgs(args);
 
 if (input == null)
 {
-    //string testArgs = "BitGet Binance -w test\\BitGetApi";
-    string testArgs = "Binance BitGet -w test\\BitGetApi";
+    string testArgs = "Binance OKX -w test\\BinanceApi";
+    //string testArgs = "OKX Binance -w test\\OKXApi";
     PowerConsole.PrintF($"args not provided, running demo:<Green>{testArgs}</Green>");
     input = Input.CommandLine(testArgs);
 }
